@@ -1,7 +1,5 @@
 package com.sagafitmi.ecommerce.dto;
 
-import java.time.LocalDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,8 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PriceDTO {
-    private Long id;
-    private Double price;
-    private LocalDateTime createdAt;
+public class UserCreateDTO {
+    private String name;
+    private String email;
+    private String password;
+    private String role;
 }
