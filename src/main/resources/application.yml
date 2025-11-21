@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: ecommerce
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecommerce
+    username: embarkx
+    password: embarkx
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        format_sql: true
+  jackson:
+    time-zone: America/Mexico_City
+
