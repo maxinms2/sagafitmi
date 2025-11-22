@@ -1,8 +1,5 @@
 package com.sagafitmi.ecommerce.dto;
 
-import java.time.LocalDateTime;
-import java.math.BigDecimal;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,8 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PriceDTO {
-    private Long id;
-    private BigDecimal price;
-    private LocalDateTime createdAt;
+public class CartItemUpdateDTO {
+    private Integer quantity;
 }

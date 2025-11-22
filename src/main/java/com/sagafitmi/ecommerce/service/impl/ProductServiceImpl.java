@@ -2,6 +2,7 @@ package com.sagafitmi.ecommerce.service.impl;
 
 import java.util.List;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
@@ -30,19 +31,31 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
+        Product existingProduct = productRepository.findByNameIgnoreCase(productDTO.getName());
+        if (existingProduct != null) {
+            return null;
+        }
         Product product = ProductMapper.toEntity(productDTO);
+
         product = productRepository.save(product);
         return ProductMapper.toDTO(product);
     }
 
     @Override
     public ProductDTO updateProduct(Long id, ProductDTO productDTO) {
-        if (!productRepository.existsById(id)) {
+        Product existingProduct = productRepository.findById(id).orElse(null);
+        if (existingProduct == null) {
             return null;
         }
         Product product = ProductMapper.toEntity(productDTO);
         product.setId(id);
+        product.setPrices(existingProduct.getPrices());
         product = productRepository.save(product);
+        if(productDTO.getPrice() != null && 
+           (existingProduct.getCurrentPriceValue() == null || 
+            productDTO.getPrice().compareTo(existingProduct.getCurrentPriceValue()) != 0)) {
+            updateProductPrice(id, productDTO.getPrice());
+        }
         return ProductMapper.toDTO(product);
     }
 
@@ -64,7 +77,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO updateProductPrice(Long id, Double newPrice) {
+    public ProductDTO updateProductPrice(Long id, BigDecimal newPrice) {
         Product product = productRepository.findById(id).orElse(null);
         if (product == null) {
             return null;
@@ -72,7 +85,7 @@ public class ProductServiceImpl implements ProductService {
 
         // Crear nueva entrada de precio y añadirla al historial
         Price p = new Price();
-        p.setPrice(BigDecimal.valueOf(newPrice));
+        p.setPrice(newPrice.setScale(2, RoundingMode.HALF_EVEN));
         p.setCreatedAt(LocalDateTime.now());
         p.setProduct(product);
         product.getPrices().add(p);

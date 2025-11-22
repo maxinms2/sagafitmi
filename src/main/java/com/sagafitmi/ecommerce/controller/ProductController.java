@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sagafitmi.ecommerce.dto.ProductDTO;
 import com.sagafitmi.ecommerce.dto.PriceUpdateDTO;
+import jakarta.validation.Valid;
 import com.sagafitmi.ecommerce.service.ProductService;
 
 @RestController
@@ -40,8 +41,11 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO) {
+    public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductDTO productDTO) {
         ProductDTO createdProduct = productService.createProduct(productDTO);
+        if(createdProduct == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
     }
 
@@ -58,7 +62,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}/price")
-    public ResponseEntity<ProductDTO> updateProductPrice(@PathVariable Long id, @RequestBody PriceUpdateDTO priceUpdate) {
+    public ResponseEntity<ProductDTO> updateProductPrice(@PathVariable Long id, @Valid @RequestBody PriceUpdateDTO priceUpdate) {
         if (priceUpdate == null || priceUpdate.getPrice() == null) {
             return ResponseEntity.badRequest().build();
         }
