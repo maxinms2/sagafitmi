@@ -1,6 +1,7 @@
 package com.sagafitmi.ecommerce.config;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,6 +12,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.http.HttpMethod;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.sagafitmi.ecommerce.service.AllowedOriginService;
 
 import com.sagafitmi.ecommerce.security.JwtAuthenticationFilter;
 
@@ -29,8 +38,9 @@ public class SecurityConfig {
      * Más adelante cambiaremos las reglas para exigir autenticación y JWT.
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter, @Qualifier("corsConfigurationSource") CorsConfigurationSource corsSource) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(corsSource))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints
@@ -59,6 +69,26 @@ public class SecurityConfig {
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource(AllowedOriginService allowedOriginService) {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        List<String> origins = allowedOriginService.getAllowedOrigins();
+        if (origins == null || origins.isEmpty()) {
+            // Fallback a localhost:5173 si la tabla está vacía
+            origins = List.of("http://localhost:5173");
+        }
+
+        configuration.setAllowedOrigins(origins);
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean
