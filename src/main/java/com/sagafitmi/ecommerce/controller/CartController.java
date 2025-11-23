@@ -61,5 +61,17 @@ public class CartController {
 		return ResponseEntity.noContent().build();
 	}
 
+	@GetMapping("/price-mismatch")
+	public ResponseEntity<java.util.List<CartItemDTO>> getPriceMismatchAll() {
+		java.util.List<CartItemDTO> items = cartItemService.findCartItemsWithPriceMismatch(null);
+		return ResponseEntity.ok(items);
+	}
+
+	@GetMapping("/price-mismatch/{userId}")
+	public ResponseEntity<java.util.List<CartItemDTO>> getPriceMismatchByUser(@PathVariable Long userId) {
+		java.util.List<CartItemDTO> items = cartItemService.findCartItemsWithPriceMismatch(userId);
+		return ResponseEntity.ok(items);
+	}
+
 }
 

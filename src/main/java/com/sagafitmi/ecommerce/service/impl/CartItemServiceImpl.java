@@ -97,4 +97,25 @@ public class CartItemServiceImpl implements CartItemService {
         cartItemRepository.deleteByUserId(userId);
     }
 
+    @Override
+    public List<CartItemDTO> findCartItemsWithPriceMismatch(Long userId) {
+        java.util.List<com.sagafitmi.ecommerce.model.CartItem> items;
+        if (userId == null) {
+            items = cartItemRepository.findAll();
+        } else {
+            items = cartItemRepository.findByUserId(userId);
+        }
+
+        return items.stream()
+                .filter(ci -> {
+                    java.math.BigDecimal cartPrice = ci.getCurrentPrice();
+                    java.math.BigDecimal prodPrice = ci.getProduct() != null ? ci.getProduct().getCurrentPriceValue() : null;
+                    if (cartPrice == null && prodPrice == null) return false;
+                    if (cartPrice == null || prodPrice == null) return true;
+                    return cartPrice.compareTo(prodPrice) != 0;
+                })
+                .map(CartItemMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
 }
