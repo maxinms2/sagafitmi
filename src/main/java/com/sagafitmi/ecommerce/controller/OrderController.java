@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +27,7 @@ public class OrderController {
     }
 
     @PostMapping("/user/{userId}")
+    @PreAuthorize("@authz.isCurrentUser(#userId)")
     public ResponseEntity<OrderDTO> createOrderFromCart(@PathVariable Long userId) {
         OrderDTO created = orderService.createOrderFromCart(userId);
         if (created == null) return ResponseEntity.badRequest().build();
@@ -33,6 +35,7 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
+    @PreAuthorize("@authz.isOrderOwnerOrAdmin(#orderId)")
     public ResponseEntity<OrderDTO> getOrderById(@PathVariable Long orderId) {
         OrderDTO dto = orderService.getOrderById(orderId);
         if (dto == null) return ResponseEntity.notFound().build();
@@ -40,12 +43,14 @@ public class OrderController {
     }
 
     @GetMapping("/user/{userId}")
+    @PreAuthorize("hasRole('ADMIN') or @authz.isCurrentUser(#userId)")
     public ResponseEntity<List<OrderDTO>> getOrdersByUser(@PathVariable Long userId) {
         List<OrderDTO> list = orderService.getOrdersByUser(userId);
         return ResponseEntity.ok(list);
     }
 
     @GetMapping("/status/{status}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<OrderDTO>> getOrdersByStatus(@PathVariable String status) {
         try {
             OrderStatus st = OrderStatus.valueOf(status.toUpperCase());
@@ -57,6 +62,7 @@ public class OrderController {
     }
 
     @PutMapping("/{orderId}/status/{status}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OrderDTO> updateOrderStatus(@PathVariable Long orderId, @PathVariable String status) {
         try {
             OrderStatus st = OrderStatus.valueOf(status.toUpperCase());
