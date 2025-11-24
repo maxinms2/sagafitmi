@@ -28,7 +28,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "prices")
+@ToString(exclude = {"prices", "images"})
 public class Product {
 
     @Id
@@ -36,9 +36,15 @@ public class Product {
     private Long id;
     private String name;
     private String description;
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Price> prices = new ArrayList<>();
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<ProductImage> images = new ArrayList<>();
 
     // Conveniencia: obtener el precio más reciente (por createdAt)
     public Price getCurrentPrice() {
@@ -52,5 +58,18 @@ public class Product {
     public BigDecimal getCurrentPriceValue() {
         Price p = getCurrentPrice();
         return p != null ? p.getPrice() : null;
+    }
+
+    // Helpers para mantener la relación bidireccional
+    public void addImage(ProductImage image) {
+        if (image == null) return;
+        images.add(image);
+        image.setProduct(this);
+    }
+
+    public void removeImage(ProductImage image) {
+        if (image == null) return;
+        images.remove(image);
+        image.setProduct(null);
     }
 }

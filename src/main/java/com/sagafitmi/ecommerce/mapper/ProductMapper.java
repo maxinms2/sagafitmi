@@ -39,6 +39,17 @@ public class ProductMapper {
         return dto;
     }
 
+    public static ProductDTO toSummaryDTO(Product product, java.math.BigDecimal price, String mainImageUrl) {
+        if (product == null) return null;
+        ProductDTO dto = new ProductDTO();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        dto.setDescription(product.getDescription());
+        dto.setPrice(price);
+        dto.setMainImageUrl(mainImageUrl);
+        return dto;
+    }
+
     public static Product toEntity(ProductDTO dto) {
         if (dto == null)
             return null;

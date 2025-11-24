@@ -22,6 +22,8 @@ public class ProductDTO {
     @Digits(integer = 12, fraction = 2)
     @DecimalMin(value = "0.00", inclusive = true)
     private BigDecimal price;
+    // URL de la imagen principal (opcional)
+    private String mainImageUrl;
     // optional price history
     //private List<PriceDTO> priceHistory;
 }

@@ -47,8 +47,14 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
 
-                // Products: allow read for everyone, restrict write/update/delete to ADMIN
-                .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").permitAll()
+                // Product images: only ADMIN can access any images endpoints
+                .requestMatchers(HttpMethod.GET, "/api/images/**").permitAll()
+                .requestMatchers(HttpMethod.POST,"/api/images/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE,"/api/images/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT,"/api/images/**").hasRole("ADMIN")
+                
+                // Products: allow read for everyone (list, detail, search), restrict write/update/delete to ADMIN
+                .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/*", "/api/products/search").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/products").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/cart/**").hasAnyRole("ADMIN", "USER")
                 .requestMatchers(HttpMethod.DELETE, "/api/cart/**").hasAnyRole("ADMIN", "USER")
@@ -56,6 +62,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/cart/**").hasAnyRole("ADMIN", "USER")
                 .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/products").hasRole("ADMIN")
 
                 // Users: only ADMIN can access any user endpoints
                 .requestMatchers("/api/users/**").hasRole("ADMIN")

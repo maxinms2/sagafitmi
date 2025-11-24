@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import com.sagafitmi.ecommerce.dto.ProductDTO;
 import com.sagafitmi.ecommerce.dto.PriceUpdateDTO;
@@ -32,6 +35,21 @@ public class ProductController {
     public ResponseEntity<List<ProductDTO>> getAllProducts() {
         List<ProductDTO> products = productService.getAllProducts();
         return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ProductDTO>> searchProducts(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(name = "pagesize", required = false) Integer pagesize) {
+
+        int size = (pagesize == null) ? 20 : pagesize;
+        int pageNumber = (page == null) ? 0 : page;
+        PageRequest pageable = PageRequest.of(pageNumber, size);
+
+        Page<ProductDTO> result = productService.searchProducts(name, description, pageable);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")
