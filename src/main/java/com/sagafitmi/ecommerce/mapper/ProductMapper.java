@@ -3,10 +3,7 @@ package com.sagafitmi.ecommerce.mapper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.sagafitmi.ecommerce.dto.PriceDTO;
+ 
 import com.sagafitmi.ecommerce.dto.ProductDTO;
 import com.sagafitmi.ecommerce.model.Price;
 import com.sagafitmi.ecommerce.model.Product;
@@ -46,7 +43,31 @@ public class ProductMapper {
         dto.setName(product.getName());
         dto.setDescription(product.getDescription());
         dto.setPrice(price);
-        dto.setMainImageUrl(mainImageUrl);
+        // Convert local filesystem paths (e.g. C:/imgs/uuid.jpg) to a
+        // web-accessible URL that the frontend can use. If the stored
+        // value already looks like an HTTP URL or a relative path, keep it.
+        if (mainImageUrl == null) {
+            dto.setMainImageUrl(null);
+        } else {
+            String lower = mainImageUrl.toLowerCase();
+            if (lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("/")) {
+                dto.setMainImageUrl(mainImageUrl);
+            } else {
+                // try to extract filename and expose under /images/{filename}
+                try {
+                    java.nio.file.Path p = java.nio.file.Paths.get(mainImageUrl);
+                    String filename = p.getFileName() != null ? p.getFileName().toString() : null;
+                    if (filename == null || filename.isBlank()) {
+                        dto.setMainImageUrl(mainImageUrl);
+                    } else {
+                        dto.setMainImageUrl("/images/" + filename);
+                    }
+                } catch (Exception ex) {
+                    // fallback: return original value
+                    dto.setMainImageUrl(mainImageUrl);
+                }
+            }
+        }
         return dto;
     }
 

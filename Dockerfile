@@ -1,0 +1,22 @@
+# Build stage: Maven + JDK 21 (esta imagen SIEMPRE existe)
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /workspace
+
+COPY pom.xml mvnw mvnw.cmd ./
+COPY .mvn .mvn
+COPY src ./src
+
+RUN mvn -B -DskipTests package
+
+# Runtime stage: Temurin JRE 21 (imagen ultra estable)
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+
+COPY --from=build /workspace/target/*.jar app.jar
+
+ENV JAVA_OPTS="-Xms128m -Xmx256m"
+
+EXPOSE 8080
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+

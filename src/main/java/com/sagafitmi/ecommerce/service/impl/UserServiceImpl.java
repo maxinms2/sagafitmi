@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.sagafitmi.ecommerce.dto.UserCreateDTO;
 import com.sagafitmi.ecommerce.dto.UserDTO;
 import com.sagafitmi.ecommerce.mapper.UserMapper;
+import com.sagafitmi.ecommerce.model.Role;
 import com.sagafitmi.ecommerce.model.User;
 import com.sagafitmi.ecommerce.repository.UserRepository;
 import com.sagafitmi.ecommerce.service.UserService;
@@ -50,6 +51,8 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = UserMapper.toEntity(userCreateDTO);
+        // Ensure newly created users always get the USER role
+        user.setRole(Role.USER);
         // hash password with pepper
         String raw = userCreateDTO.getPassword() != null ? userCreateDTO.getPassword() : "";
         String toHash = raw + (pepper != null ? pepper : "");

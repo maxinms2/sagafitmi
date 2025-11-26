@@ -71,14 +71,14 @@ public class UserController {
         return ResponseEntity.ok(dto);
     }
 
-    @PostMapping("/authenticate")
-    public ResponseEntity<Void> authenticate(@RequestBody AuthRequestDTO auth) {
-        if (auth == null || auth.getEmail() == null || auth.getPassword() == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        boolean ok = userService.authenticate(auth.getEmail(), auth.getPassword());
-        if (!ok) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        return ResponseEntity.ok().build();
-    }
+    // @PostMapping("/authenticate")
+    // public ResponseEntity<Void> authenticate(@RequestBody AuthRequestDTO auth) {
+    //     if (auth == null || auth.getEmail() == null || auth.getPassword() == null) {
+    //         return ResponseEntity.badRequest().build();
+    //     }
+    //     boolean ok = userService.authenticate(auth.getEmail(), auth.getPassword());
+    //     if (!ok) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    //     return ResponseEntity.ok().build();
+    // }
 
 }

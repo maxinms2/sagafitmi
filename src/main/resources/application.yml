@@ -1,10 +1,14 @@
+server:
+  port: ${PORT:${SERVER_PORT:8081}}
 spring:
   application:
-    name: ecommerce
+    name: backend-sagafitmi
   datasource:
-    url: jdbc:postgresql://44.210.16.222:5432/ecommerce
-    username: ecommerce
-    password: ecommerce
+    url: ${JDBC_URL:jdbc:postgresql://sagafitmi-postgres.cc98asqskhem.us-east-1.rds.amazonaws.com:5432/postgres}
+    # Read from environment variables if provided, otherwise fallback to the hardcoded values
+    # Priority: DB_USERNAME / DB_PASSWORD, then SPRING_DATASOURCE_USERNAME / SPRING_DATASOURCE_PASSWORD, then the defaults
+    username: ${DB_USERNAME:sagafitmi}
+    password: ${DB_PASSWORD:Peluso3000.}
   jpa:
     database: POSTGRESQL
     show-sql: true
@@ -16,13 +20,4 @@ spring:
         format_sql: true
   jackson:
     time-zone: America/Mexico_City
-
-  data:
-    web:
-      pageable:
-        default-page-size: 20
-        max-page-size: 200
-        page-parameter: page
-        size-parameter: size
-        one-indexed-parameters: false
 

@@ -52,7 +52,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,"/api/images/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE,"/api/images/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT,"/api/images/**").hasRole("ADMIN")
-                
+                .requestMatchers("/images/**").permitAll()
                 // Products: allow read for everyone (list, detail, search), restrict write/update/delete to ADMIN
                 .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/*", "/api/products/search").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/products").hasRole("ADMIN")
@@ -65,6 +65,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/products").hasRole("ADMIN")
 
                 // Users: only ADMIN can access any user endpoints
+                // Allow account creation without authentication
+                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                // Other user endpoints require ADMIN
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
 
                 // Any other request requires authentication

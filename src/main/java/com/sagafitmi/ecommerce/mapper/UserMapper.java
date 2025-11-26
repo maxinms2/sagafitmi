@@ -36,8 +36,11 @@ public class UserMapper {
 
     public static void updateEntityFromDTO(UserDTO dto, User user) {
         if (dto == null || user == null) return;
-        user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
+        // Only update fields that are non-null in the DTO so that nulls mean "keep current value"
+        if (dto.getName() != null) {
+            user.setName(dto.getName());
+        }
+        // Email is immutable/identifier: never update it from the DTO (ignore any provided value)
         // update role if provided
         if (dto.getRole() != null) {
             try {

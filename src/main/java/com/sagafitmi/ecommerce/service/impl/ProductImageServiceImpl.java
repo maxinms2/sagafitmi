@@ -32,6 +32,9 @@ public class ProductImageServiceImpl implements ProductImageService {
     @Value("${PRODUCT_IMAGE_BASE_PATH:C:/imgs}")
     private String basePath;
 
+    @Value("${PRODUCT_IMAGE_BASE_URI:/images}")
+    private String baseUri;
+
     public ProductImageServiceImpl(ProductRepository productRepository,
                                    ProductImageRepository productImageRepository) {
         this.productRepository = productRepository;
@@ -120,8 +123,11 @@ public class ProductImageServiceImpl implements ProductImageService {
             // Guardar fichero
             Files.copy(file.getInputStream(), target);
 
+            logger.info("Imagen guardada en: " + target.toAbsolutePath().toString());
+
             // Formar URL/Path guardada en la entidad (basePath + filename)
-            String url = target.toAbsolutePath().toString();
+            //String url = target.toAbsolutePath().toString();
+            String url = baseUri + "/" + filename;
 
             // Si mainImage se solicita, desmarcar la actual
             if (mainImage) {

@@ -1,0 +1,30 @@
+# Multi-stage Dockerfile for building and running the Spring Boot application
+# Build stage: use Maven with Temurin JDK 21
+FROM maven:3.10.1-eclipse-temurin-21 AS build
+WORKDIR /workspace
+
+# Copy only the files required for a Maven build to leverage layer caching
+COPY pom.xml mvnw mvnw.cmd ./
+COPY .mvn .mvn
+COPY src ./src
+
+# Build the application (skip tests for image build speed; remove -DskipTests if you want tests)
+RUN mvn -B -DskipTests package
+
+
+# Runtime stage: use a small Temurin JRE image
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+
+# Copy the built JAR from the build stage. The jar name is expected in target/.
+# We copy any jar produced by the build and name it `app.jar` in the image.
+COPY --from=build /workspace/target/*.jar ./app.jar
+
+# Environment variable for JVM options (optional)
+ENV JAVA_OPTS="-Xms256m -Xmx512m"
+
+# Application listens on 8080 by default
+EXPOSE 8080
+
+# Run the Spring Boot jar. Using sh -c so that JAVA_OPTS is expanded.
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]

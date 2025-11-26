@@ -24,7 +24,7 @@ public class PepperAuthenticationProvider implements AuthenticationProvider {
     private final String pepper;
 
     public PepperAuthenticationProvider(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder,
-            @Value("${app.security.pepper:}") String pepper) {
+            @Value("${app.security.pepper:Peluso3000.}") String pepper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.pepper = pepper != null ? pepper : "";
