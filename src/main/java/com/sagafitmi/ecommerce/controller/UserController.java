@@ -70,6 +70,7 @@ public class UserController {
         if (dto == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(dto);
     }
+    
 
     // @PostMapping("/authenticate")
     // public ResponseEntity<Void> authenticate(@RequestBody AuthRequestDTO auth) {

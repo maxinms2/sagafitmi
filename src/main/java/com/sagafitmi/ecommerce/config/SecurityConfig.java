@@ -67,6 +67,8 @@ public class SecurityConfig {
                 // Users: only ADMIN can access any user endpoints
                 // Allow account creation without authentication
                 .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                // Allow lookup by email for authenticated users (ADMIN or USER)
+                .requestMatchers(HttpMethod.GET, "/api/users/by-email").hasAnyRole("ADMIN", "USER")
                 // Other user endpoints require ADMIN
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
 
