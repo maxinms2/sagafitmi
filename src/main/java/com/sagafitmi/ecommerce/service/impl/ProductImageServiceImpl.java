@@ -174,6 +174,24 @@ public class ProductImageServiceImpl implements ProductImageService {
             } catch (Exception ex) {
                 // Si no es un path válido (p. ej. URL http://...), ignorar
             }
+            // Si la URL está almacenada como `baseUri/<filename>` (p. ej. "/images/uuid.jpg"),
+            // intentar borrar el fichero real bajo `basePath` (p. ej. C:/imgs/uuid.jpg).
+            try {
+                if (baseUri != null && url.startsWith(baseUri) || url.contains("/")) {
+                    String filename = url.substring(url.lastIndexOf('/') + 1);
+                    if (filename != null && !filename.isBlank()) {
+                        Path alt = Paths.get(basePath, filename);
+                        try {
+                            Files.deleteIfExists(alt);
+                            logger.info("Imagen física borrada en: {}", alt.toAbsolutePath().toString());
+                        } catch (Exception ex) {
+                            logger.error("No se pudo borrar fichero de imagen (ruta derivada): {}", ex.getMessage());
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                // ignorar errores de derivación de ruta
+            }
         }
 
         // Mantener consistencia en la relación: eliminar de la colección del producto

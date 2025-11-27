@@ -12,4 +12,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 
     List<OrderItem> findByOrderId(Long orderId);
 
+    // existe al menos un order item para un producto
+    boolean existsByProductId(Long productId);
+
 }

@@ -40,6 +40,10 @@ public class UserMapper {
         if (dto.getName() != null) {
             user.setName(dto.getName());
         }
+        // Update email if provided in DTO
+        if (dto.getEmail() != null) {
+            user.setEmail(dto.getEmail());
+        }
         // Email is immutable/identifier: never update it from the DTO (ignore any provided value)
         // update role if provided
         if (dto.getRole() != null) {

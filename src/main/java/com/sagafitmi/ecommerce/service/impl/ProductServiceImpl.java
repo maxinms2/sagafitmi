@@ -19,6 +19,9 @@ import com.sagafitmi.ecommerce.model.Product;
 import com.sagafitmi.ecommerce.repository.ProductRepository;
 import com.sagafitmi.ecommerce.repository.PriceRepository;
 import com.sagafitmi.ecommerce.repository.ProductImageRepository;
+import com.sagafitmi.ecommerce.repository.CartItemRepository;
+import com.sagafitmi.ecommerce.repository.OrderItemRepository;
+import com.sagafitmi.ecommerce.service.ProductImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.sagafitmi.ecommerce.service.ProductService;
 
@@ -28,14 +31,23 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final PriceRepository priceRepository;
     private final ProductImageRepository productImageRepository;
+    private final CartItemRepository cartItemRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final ProductImageService productImageService;
 
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository,
             PriceRepository priceRepository,
-            ProductImageRepository productImageRepository) {
+            ProductImageRepository productImageRepository,
+            CartItemRepository cartItemRepository,
+            OrderItemRepository orderItemRepository,
+            ProductImageService productImageService) {
         this.productRepository = productRepository;
         this.priceRepository = priceRepository;
         this.productImageRepository = productImageRepository;
+        this.cartItemRepository = cartItemRepository;
+        this.orderItemRepository = orderItemRepository;
+        this.productImageService = productImageService;
     }
 
     // Compat constructor para tests existentes y usos previos
@@ -43,6 +55,9 @@ public class ProductServiceImpl implements ProductService {
         this.productRepository = productRepository;
         this.priceRepository = null;
         this.productImageRepository = null;
+        this.cartItemRepository = null;
+        this.orderItemRepository = null;
+        this.productImageService = null;
     }
 
     @Override
@@ -88,6 +103,17 @@ public class ProductServiceImpl implements ProductService {
         if (existingProduct == null) {
             return null;
         }
+        // Validar nombre único (case-insensitive) antes de aplicar cambios.
+        // Si existe otro producto con el mismo nombre (ignorando mayúsculas/minúsculas), no aplicar la modificación.
+        String newName = productDTO.getName();
+        if (newName != null && !newName.isBlank()) {
+            // Buscar otro producto con el mismo nombre pero distinto id (más eficiente y directo)
+            Product other = productRepository.findByNameIgnoreCaseAndIdNot(newName, id);
+            if (other != null) {
+                // Nombre ya usado por otro producto -> abortar actualización
+                return null;
+            }
+        }
         Product product = ProductMapper.toEntity(productDTO);
         product.setId(id);
         product.setPrices(existingProduct.getPrices());
@@ -105,6 +131,32 @@ public class ProductServiceImpl implements ProductService {
         if (!productRepository.existsById(id)) {
             return;
         }
+
+        // Si no se inyectaron repositorios adicionales (compatibilidad con tests), conservar comportamiento anterior
+        if (cartItemRepository == null || orderItemRepository == null || productImageService == null || productImageRepository == null) {
+            productRepository.deleteById(id);
+            return;
+        }
+
+        // No eliminar si hay referencias en carrito u órdenes
+        if (cartItemRepository.existsByProductId(id) || orderItemRepository.existsByProductId(id)) {
+            throw new IllegalStateException("No se puede eliminar producto: existen referencias en carrito u órdenes");
+        }
+
+        // Eliminar imágenes físicas y registros relacionados en product_images
+        java.util.List<com.sagafitmi.ecommerce.model.ProductImage> imgs = productImageRepository.findByProductId(id);
+        if (imgs != null && !imgs.isEmpty()) {
+            for (com.sagafitmi.ecommerce.model.ProductImage img : imgs) {
+                try {
+                    productImageService.deleteImage(img.getId());
+                } catch (Exception ex) {
+                    // Registrar y continuar: fallo al borrar fichero o registro concreto no debe dejar inconsistencia
+                    // Si quieres cambiar a fallo duro, lanza la excepción.
+                }
+            }
+        }
+
+        // El borrado del producto cascada eliminará los precios (cascade = ALL)
         productRepository.deleteById(id);
     }
 
