@@ -72,6 +72,9 @@ public class SecurityConfig {
                 // Other user endpoints require ADMIN
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
 
+                // Metrics: only ADMIN can access metrics endpoints
+                .requestMatchers("/api/metrics/**").hasRole("ADMIN")
+
                 // Any other request requires authentication
                 .anyRequest().authenticated()
             )
