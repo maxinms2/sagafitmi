@@ -1,6 +1,7 @@
 package com.sagafitmi.ecommerce.service.impl;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,10 @@ import com.sagafitmi.ecommerce.repository.CartItemRepository;
 import com.sagafitmi.ecommerce.repository.OrderRepository;
 import com.sagafitmi.ecommerce.repository.UserRepository;
 import com.sagafitmi.ecommerce.service.OrderService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -111,6 +116,25 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(status);
         Order saved = orderRepository.save(order);
         return OrderMapper.toDTO(saved);
+    }
+
+    @Override
+    public Page<OrderDTO> searchOrders(LocalDateTime start, LocalDateTime end, OrderStatus status, int page, int size) {
+        Specification<Order> spec = Specification.where(null);
+
+        if (start != null) {
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("createdAt"), start));
+        }
+        if (end != null) {
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("createdAt"), end));
+        }
+        if (status != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+        }
+
+        Page<Order> result = orderRepository.findAll(spec, PageRequest.of(Math.max(0, page), Math.max(1, size), Sort.by(Sort.Direction.DESC, "createdAt")));
+        // Map to summary DTO to avoid initializing `items` collection (lazy)
+        return result.map(OrderMapper::toSummaryDTO);
     }
 
 }

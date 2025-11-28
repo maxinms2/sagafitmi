@@ -27,4 +27,19 @@ public class OrderMapper {
         return dto;
     }
 
+    /**
+     * Mapea una orden a DTO sin cargar ni incluir los items (resumen).
+     * Útil para listados/paginación donde no queremos inicializar la colección.
+     */
+    public static OrderDTO toSummaryDTO(Order order) {
+        if (order == null) return null;
+        return OrderDTO.builder()
+                .id(order.getId())
+                .userId(order.getUser() != null ? order.getUser().getId() : null)
+                .total(order.getTotal())
+                .status(order.getStatus())
+                .createdAt(order.getCreatedAt())
+                .build();
+    }
+
 }

@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,6 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sagafitmi.ecommerce.dto.OrderDTO;
 import com.sagafitmi.ecommerce.model.OrderStatus;
 import com.sagafitmi.ecommerce.service.OrderService;
+import org.springframework.data.domain.Page;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -72,6 +79,39 @@ public class OrderController {
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<OrderDTO>> searchOrders(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+        OrderStatus st = null;
+
+        try {
+            if (startDate != null && !startDate.isBlank()) {
+                LocalDate sd = LocalDate.parse(startDate);
+                start = sd.atStartOfDay();
+            }
+            if (endDate != null && !endDate.isBlank()) {
+                LocalDate ed = LocalDate.parse(endDate);
+                end = ed.atTime(LocalTime.MAX);
+            }
+            if (status != null && !status.isBlank()) {
+                st = OrderStatus.valueOf(status.toUpperCase());
+            }
+        } catch (DateTimeParseException | IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Page<OrderDTO> result = orderService.searchOrders(start, end, st, page, size);
+        return ResponseEntity.ok(result);
     }
 
 }

@@ -1,6 +1,9 @@
 package com.sagafitmi.ecommerce.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
+import org.springframework.data.domain.Page;
 
 import com.sagafitmi.ecommerce.dto.OrderDTO;
 import com.sagafitmi.ecommerce.model.OrderStatus;
@@ -21,6 +24,18 @@ public interface OrderService {
     List<OrderDTO> getOrdersByUser(Long userId);
 
     List<OrderDTO> getOrdersByStatus(OrderStatus status);
+
+    /**
+     * Busca órdenes filtrando opcionalmente por rango de fechas y estado.
+     * Retorna una página de resultados.
+     * @param start fecha/hora inicial (inclusive) o null
+     * @param end fecha/hora final (inclusive) o null
+     * @param status estado a filtrar o null
+     * @param page número de página (0-index)
+     * @param size tamaño de página
+     * @return página de OrderDTO
+     */
+    Page<OrderDTO> searchOrders(LocalDateTime start, LocalDateTime end, OrderStatus status, int page, int size);
 
     /**
      * Actualiza el estado de la orden (ej. para marcar como PROCESSING, COMPLETED, CANCELLED).
