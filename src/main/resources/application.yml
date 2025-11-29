@@ -11,7 +11,7 @@ spring:
     password: ${DB_PASSWORD:Peluso3000.}
   jpa:
     database: POSTGRESQL
-    show-sql: true
+    #show-sql: true
     hibernate:
       ddl-auto: update
     database-platform: org.hibernate.dialect.PostgreSQLDialect
