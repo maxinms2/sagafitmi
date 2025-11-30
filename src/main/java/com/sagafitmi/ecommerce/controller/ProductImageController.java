@@ -21,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sagafitmi.ecommerce.dto.ProductImageDTO;
 import com.sagafitmi.ecommerce.model.ProductImage;
 import com.sagafitmi.ecommerce.service.ProductImageService;
+import com.sagafitmi.ecommerce.exception.ResourceNotFoundException;
+import com.sagafitmi.ecommerce.exception.BadRequestException;
 
 @RestController
 @RequestMapping("/api/images")
@@ -37,16 +39,10 @@ public class ProductImageController {
             @RequestPart("file") MultipartFile file,
             @RequestParam(name = "mainImage", required = false, defaultValue = "false") Boolean mainImage
         ) {
-        try {
-            ProductImage img = productImageService.createImage(productId, file, mainImage);
-            if (img == null) return ResponseEntity.notFound().build();
-            ProductImageDTO dto = toDto(img);
-            return ResponseEntity.status(HttpStatus.CREATED).body(dto);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().build();
-        } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        ProductImage img = productImageService.createImage(productId, file, mainImage);
+        if (img == null) throw new ResourceNotFoundException("Producto no encontrado para id=" + productId);
+        ProductImageDTO dto = toDto(img);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     @GetMapping("/{productId}")
@@ -65,12 +61,12 @@ public class ProductImageController {
     @PutMapping("/main/{productId}/{imageId}")
     public ResponseEntity<ProductImageDTO> assignMain(@PathVariable Long productId, @PathVariable Long imageId) {
         ProductImage img = productImageService.assignMainImage(productId, imageId);
-        if (img == null) return ResponseEntity.notFound().build();
+        if (img == null) throw new ResourceNotFoundException("Imagen no encontrada: id=" + imageId);
         return ResponseEntity.ok(toDto(img));
     }
 
     private ProductImageDTO toDto(ProductImage img) {
-        if (img == null) return null;
+        if (img == null) throw new BadRequestException("Imagen nula");
         return ProductImageDTO.builder()
                 .id(img.getId())
                 .url(img.getUrl())

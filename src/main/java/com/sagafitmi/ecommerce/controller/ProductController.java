@@ -61,9 +61,6 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductDTO productDTO) {
         ProductDTO createdProduct = productService.createProduct(productDTO);
-        if(createdProduct == null) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
     }
 

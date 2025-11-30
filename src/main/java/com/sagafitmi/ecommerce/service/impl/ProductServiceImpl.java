@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.sagafitmi.ecommerce.dto.ProductDTO;
+import com.sagafitmi.ecommerce.exception.ProductCreateException;
 import com.sagafitmi.ecommerce.model.Price;
 import com.sagafitmi.ecommerce.mapper.ProductMapper;
 import com.sagafitmi.ecommerce.model.Product;
@@ -89,7 +90,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductDTO createProduct(ProductDTO productDTO) {
         Product existingProduct = productRepository.findByNameIgnoreCaseAndDescriptionIgnoreCaseAndIdNot(productDTO.getName(), productDTO.getDescription(), null);
         if (existingProduct != null) {
-            return null;
+            throw new ProductCreateException("Ya existe un producto con el mismo nombre y descripción");
         }
         Product product = ProductMapper.toEntity(productDTO);
 
@@ -111,7 +112,7 @@ public class ProductServiceImpl implements ProductService {
             Product other = productRepository.findByNameIgnoreCaseAndDescriptionIgnoreCaseAndIdNot(newName, productDTO.getDescription(), id);
             if (other != null) {
                 // Nombre ya usado por otro producto -> abortar actualización
-                return null;
+                throw new ProductCreateException("Ya existe un producto con el mismo nombre y descripción");
             }
         }
         Product product = ProductMapper.toEntity(productDTO);

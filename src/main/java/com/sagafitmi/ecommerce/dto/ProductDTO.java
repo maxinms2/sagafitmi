@@ -1,6 +1,4 @@
 package com.sagafitmi.ecommerce.dto;
-
-import java.util.List;
 import java.math.BigDecimal;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.DecimalMin;

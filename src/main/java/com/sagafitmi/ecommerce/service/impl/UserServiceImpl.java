@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 import com.sagafitmi.ecommerce.dto.UserCreateDTO;
 import com.sagafitmi.ecommerce.dto.UserDTO;
+import com.sagafitmi.ecommerce.exception.UserCreateException;
+import com.sagafitmi.ecommerce.exception.UserDeleteException;
+import com.sagafitmi.ecommerce.exception.UserUpdateException;
 import com.sagafitmi.ecommerce.mapper.UserMapper;
 import com.sagafitmi.ecommerce.model.Role;
 import com.sagafitmi.ecommerce.model.User;
@@ -58,7 +61,7 @@ public class UserServiceImpl implements UserService {
 
         // Simple uniqueness check: if email already exists, return null
         if (userCreateDTO.getEmail() != null && userRepository.findByEmail(userCreateDTO.getEmail()).isPresent()) {
-            return null;
+            throw new UserCreateException("Usuario ya existe con el email: " + userCreateDTO.getEmail());
         }
 
         User user = UserMapper.toEntity(userCreateDTO);
@@ -75,15 +78,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO updateUser(Long id, UserDTO userDTO) {
-        if (!userRepository.existsById(id)) {
-            return null;
-        }
-        if(isSuperUser(userDTO.getEmail())){
-            return null;
-        }
         User existing = userRepository.findById(id).orElse(null);
-        if (existing == null) return null;
-
+        if (existing == null){
+            throw new UserUpdateException(" usuario no existe con id: " + id);
+        }
+        if(isSuperUser(existing.getEmail())){
+            throw new UserUpdateException(" No se puede modificar el super usuario");
+        }
         UserMapper.updateEntityFromDTO(userDTO, existing);
         existing = userRepository.save(existing);
         return UserMapper.toDTO(existing);
@@ -97,9 +98,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long id) {
         User user = userRepository.findById(id).orElse(null);
-        if(user == null) return;
+        if(user == null){
+            throw new UserDeleteException(" usuario no existe con id: " + id);
+        }
         if (isSuperUser(user.getEmail())) {
-            return;
+            throw new UserDeleteException(" No se puede eliminar el super usuario");
         }   
         // comprobaciones eficientes: usar queries "exists" para evitar traer listas
         Long userId = user.getId();
@@ -108,7 +111,7 @@ public class UserServiceImpl implements UserService {
 
         if (hasCartItems || hasOrders) {
             // No eliminar: existe información relacionada en otras tablas
-            return;
+            throw new UserDeleteException(" No se puede eliminar el usuario porque tiene información relacionada en otras tablas");
         }
 
         userRepository.deleteById(id);

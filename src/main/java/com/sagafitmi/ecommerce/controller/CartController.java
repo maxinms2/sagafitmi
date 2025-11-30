@@ -17,6 +17,8 @@ import com.sagafitmi.ecommerce.dto.CartItemCreateDTO;
 import com.sagafitmi.ecommerce.dto.CartItemDTO;
 import com.sagafitmi.ecommerce.dto.CartItemUpdateDTO;
 import com.sagafitmi.ecommerce.service.CartItemService;
+import com.sagafitmi.ecommerce.exception.BadRequestException;
+import com.sagafitmi.ecommerce.exception.ResourceNotFoundException;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -37,15 +39,15 @@ public class CartController {
 	@PostMapping
 	public ResponseEntity<CartItemDTO> addToCart(@RequestBody CartItemCreateDTO createDTO) {
 		CartItemDTO added = cartItemService.addCartItem(createDTO);
-		if (added == null) return ResponseEntity.badRequest().build();
+		if (added == null) throw new BadRequestException("No se pudo añadir el item al carrito: datos inválidos o recurso inexistente");
 		return ResponseEntity.status(HttpStatus.CREATED).body(added);
 	}
 
 	@PutMapping("/{id}")//ESte tal vez no tenga sentido
 	public ResponseEntity<CartItemDTO> updateQuantity(@PathVariable Long id, @RequestBody CartItemUpdateDTO updateDTO) {
-		if (updateDTO == null || updateDTO.getQuantity() == null) return ResponseEntity.badRequest().build();
+		if (updateDTO == null || updateDTO.getQuantity() == null) throw new BadRequestException("Cantidad requerida para actualizar");
 		CartItemDTO updated = cartItemService.updateQuantity(id, updateDTO.getQuantity());
-		if (updated == null) return ResponseEntity.notFound().build();
+		if (updated == null) throw new ResourceNotFoundException("Item del carrito no encontrado: id=" + id);
 		return ResponseEntity.ok(updated);
 	}
 

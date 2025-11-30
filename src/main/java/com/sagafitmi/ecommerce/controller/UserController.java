@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sagafitmi.ecommerce.dto.AuthRequestDTO;
 import com.sagafitmi.ecommerce.dto.UserCreateDTO;
 import com.sagafitmi.ecommerce.dto.UserDTO;
 import com.sagafitmi.ecommerce.service.UserService;
+import com.sagafitmi.ecommerce.exception.UserCreateException;
 
 @RestController
 @RequestMapping("/api/users")
@@ -44,17 +44,12 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserCreateDTO createDTO) {
         UserDTO created = userService.createUser(createDTO);
-        if (created == null) {
-            // could be conflict (email exists) or bad request
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
         UserDTO updated = userService.updateUser(id, userDTO);
-        if (updated == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(updated);
     }
 
