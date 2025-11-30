@@ -2,6 +2,7 @@ package com.sagafitmi.ecommerce.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sagafitmi.ecommerce.dto.MetricFilterRequest;
+import com.sagafitmi.ecommerce.dto.ProductMetricRequest;
 import com.sagafitmi.ecommerce.dto.MetricResponseDTO;
+import com.sagafitmi.ecommerce.dto.ProductMetricDTO;
 import com.sagafitmi.ecommerce.service.MetricService;
 
 @RestController
@@ -61,8 +64,31 @@ public class MetricController {
                 .withSecond(59)
                 .withNano(999_000_000));
         }
-        MetricResponseDTO response = metricService.getMetrics(filter);
+        MetricResponseDTO response = metricService.getMetricsOrders(filter);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/products")
+    public ResponseEntity<List<ProductMetricDTO>> getProductMetrics(@RequestBody ProductMetricRequest request) {
+        if (request.getStartDate() != null) {
+            request.setStartDate(request.getStartDate()
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0));
+        }
+
+        if (request.getEndDate() != null) {
+            request.setEndDate(request.getEndDate()
+                .withHour(23)
+                .withMinute(59)
+                .withSecond(59)
+                .withNano(999_000_000));
+        }
+        List<ProductMetricDTO> result = metricService.getProductMetrics(request);
+        return ResponseEntity.ok(result);
+    }
+
+    
 
 }

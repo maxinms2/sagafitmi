@@ -12,19 +12,30 @@ import com.sagafitmi.ecommerce.mapper.UserMapper;
 import com.sagafitmi.ecommerce.model.Role;
 import com.sagafitmi.ecommerce.model.User;
 import com.sagafitmi.ecommerce.repository.UserRepository;
+import com.sagafitmi.ecommerce.repository.OrderRepository;
+import com.sagafitmi.ecommerce.repository.CartItemRepository;
 import com.sagafitmi.ecommerce.service.UserService;
 
 @Service
 public class UserServiceImpl implements UserService {
 
+    @Value("${SUPER_USER:maxinms2@gmail.com}")
+    private String superUserEmail;
+
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
+    private final CartItemRepository cartItemRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final String pepper;
 
     public UserServiceImpl(UserRepository userRepository,
+            OrderRepository orderRepository,
+            CartItemRepository cartItemRepository,
             BCryptPasswordEncoder passwordEncoder,
             @Value("${app.security.pepper:Peluso3000.}") String pepper) {
         this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
+        this.cartItemRepository = cartItemRepository;
         this.passwordEncoder = passwordEncoder;
         this.pepper = pepper != null ? pepper : "";
     }
@@ -67,6 +78,9 @@ public class UserServiceImpl implements UserService {
         if (!userRepository.existsById(id)) {
             return null;
         }
+        if(isSuperUser(userDTO.getEmail())){
+            return null;
+        }
         User existing = userRepository.findById(id).orElse(null);
         if (existing == null) return null;
 
@@ -82,7 +96,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) return;
+        User user = userRepository.findById(id).orElse(null);
+        if(user == null) return;
+        if (isSuperUser(user.getEmail())) {
+            return;
+        }   
+        // comprobaciones eficientes: usar queries "exists" para evitar traer listas
+        Long userId = user.getId();
+        boolean hasCartItems = cartItemRepository.existsByUserId(userId);
+        boolean hasOrders = orderRepository.existsByUserId(userId);
+
+        if (hasCartItems || hasOrders) {
+            // No eliminar: existe información relacionada en otras tablas
+            return;
+        }
+
         userRepository.deleteById(id);
     }
 
@@ -93,5 +121,9 @@ public class UserServiceImpl implements UserService {
         if (user == null || user.getPassword() == null) return false;
         String toCheck = password + (pepper != null ? pepper : "");
         return passwordEncoder.matches(toCheck, user.getPassword());
+    }
+
+    private boolean isSuperUser(String email) {
+        return superUserEmail != null && superUserEmail.equalsIgnoreCase(email);
     }
 }

@@ -87,7 +87,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
-        Product existingProduct = productRepository.findByNameIgnoreCase(productDTO.getName());
+        Product existingProduct = productRepository.findByNameIgnoreCaseAndDescriptionIgnoreCaseAndIdNot(productDTO.getName(), productDTO.getDescription(), null);
         if (existingProduct != null) {
             return null;
         }
@@ -108,7 +108,7 @@ public class ProductServiceImpl implements ProductService {
         String newName = productDTO.getName();
         if (newName != null && !newName.isBlank()) {
             // Buscar otro producto con el mismo nombre pero distinto id (más eficiente y directo)
-            Product other = productRepository.findByNameIgnoreCaseAndIdNot(newName, id);
+            Product other = productRepository.findByNameIgnoreCaseAndDescriptionIgnoreCaseAndIdNot(newName, productDTO.getDescription(), id);
             if (other != null) {
                 // Nombre ya usado por otro producto -> abortar actualización
                 return null;

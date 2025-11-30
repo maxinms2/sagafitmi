@@ -19,4 +19,8 @@ public class MetricFilterRequest {
     private List<String> productDescriptions;
     private List<String> statuses;
     private List<Long> userIds;
+    // número máximo de registros a devolver
+    private Integer limit;
+    // criterio de orden: "quantity" (cantidad) o "amount" (monto)
+    private String sortBy;
 }

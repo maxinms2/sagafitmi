@@ -7,6 +7,8 @@ import java.util.List;
 import com.sagafitmi.ecommerce.dto.MetricFilterRequest;
 import com.sagafitmi.ecommerce.dto.MetricResponseDTO;
 import com.sagafitmi.ecommerce.dto.OrderItemMetricDTO;
+import com.sagafitmi.ecommerce.dto.ProductMetricDTO;
+import com.sagafitmi.ecommerce.dto.ProductMetricRequest;
 import com.sagafitmi.ecommerce.model.OrderItem;
 import com.sagafitmi.ecommerce.repository.OrderItemRepository;
 import com.sagafitmi.ecommerce.service.MetricService;
@@ -28,7 +30,7 @@ public class MetricServiceImpl implements MetricService {
 
     @Override
     @Transactional(readOnly = true)
-    public MetricResponseDTO getMetrics(MetricFilterRequest filter) {
+    public MetricResponseDTO getMetricsOrders(MetricFilterRequest filter) {
 
         List<OrderItem> orderItems = orderItemRepository.findAll(OrderItemSpecification.byFilters(filter));
 
@@ -64,6 +66,21 @@ public class MetricServiceImpl implements MetricService {
 
         rows.add(dto);
         return subtotal;
+    }
+
+   @Override
+    public List<ProductMetricDTO> getProductMetrics(ProductMetricRequest request) {
+        // Use DB aggregation queries for performance (group + sum executed in DB)
+        String sortBy = request.getSortBy() == null ? "quantity" : request.getSortBy().toLowerCase();
+            int defaultTop = 10;
+            Integer top = request.getTop();
+            int size = (top == null || top <= 0) ? defaultTop : top;
+            org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, size);
+
+            if ("amount".equals(sortBy)) {
+                return orderItemRepository.findProductMetricsOrderByAmountDesc(request.getStartDate(), request.getEndDate(), pageable);
+            }
+            return orderItemRepository.findProductMetricsOrderByQuantityDesc(request.getStartDate(), request.getEndDate(), pageable);
     }
 
 }

@@ -20,4 +20,7 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
 	// existe al menos un cart item para un producto
 	boolean existsByProductId(Long productId);
+
+	// existe al menos un cart item para un usuario
+	boolean existsByUserId(Long userId);
 }

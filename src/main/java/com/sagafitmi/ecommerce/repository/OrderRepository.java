@@ -18,4 +18,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
     List<Order> findByStatus(OrderStatus status);
 
+    // existe al menos una orden creada por el usuario
+    boolean existsByUserId(Long userId);
+
 }
