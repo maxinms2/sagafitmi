@@ -22,7 +22,7 @@ import com.sagafitmi.ecommerce.service.UserService;
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Value("${SUPER_USER:maxinms2@gmail.com}")
+    @Value("${SUPER_USER:edgar.aws.0307@gmail.com}")
     private String superUserEmail;
 
     private final UserRepository userRepository;
