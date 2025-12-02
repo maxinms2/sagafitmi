@@ -20,4 +20,20 @@ spring:
         format_sql: true
   jackson:
     time-zone: America/Mexico_City
+  mail:
+    host: smtp-relay.brevo.com
+    port: 587
+    username: 77103d001@smtp-brevo.com
+    # Password is injected from Docker compose via environment variable `BREVO_SMTP_PASSWORD`
+    password: ${BREVO_SMTP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+
 

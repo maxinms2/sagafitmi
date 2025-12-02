@@ -88,6 +88,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
+        productDTO.setName(productDTO.getName().trim());
+        productDTO.setDescription(productDTO.getDescription().trim());
         Product existingProduct = productRepository.findByNameIgnoreCaseAndDescriptionIgnoreCaseAndIdNot(productDTO.getName(), productDTO.getDescription(), null);
         if (existingProduct != null) {
             throw new ProductCreateException("Ya existe un producto con el mismo nombre y descripción");

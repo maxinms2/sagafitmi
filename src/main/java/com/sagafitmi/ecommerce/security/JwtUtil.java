@@ -18,7 +18,7 @@ public class JwtUtil {
     private final long jwtExpirationMinutes;
 
     public JwtUtil(@Value("${app.security.jwtSecret:changeit}") String jwtSecret,
-            @Value("${app.security.jwtExpirationMinutes:1200}") long jwtExpirationMinutes) {
+            @Value("${app.security.jwtExpirationMinutes:5}") long jwtExpirationMinutes) {
         this.jwtSecret = jwtSecret;
         this.jwtExpirationMinutes = jwtExpirationMinutes;
     }

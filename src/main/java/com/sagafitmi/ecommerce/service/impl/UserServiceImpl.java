@@ -58,7 +58,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO createUser(UserCreateDTO userCreateDTO) {
         if (userCreateDTO == null) return null;
-
+        userCreateDTO.setEmail(userCreateDTO.getEmail().toLowerCase().trim());
+        userCreateDTO.setName(userCreateDTO.getName().trim());
         // Simple uniqueness check: if email already exists, return null
         if (userCreateDTO.getEmail() != null && userRepository.findByEmail(userCreateDTO.getEmail()).isPresent()) {
             throw new UserCreateException("Usuario ya existe con el email: " + userCreateDTO.getEmail());
@@ -92,7 +93,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO findByEmail(String email) {
-        return userRepository.findByEmail(email).map(UserMapper::toDTO).orElse(null);
+        return userRepository.findByEmail(email.toLowerCase().trim()).map(UserMapper::toDTO).orElse(null);
     }
 
     @Override
